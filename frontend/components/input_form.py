@@ -1,7 +1,7 @@
 import streamlit as st
 
 def user_input_form():
-    st.header("🩺 How Likely Is It Really?")
+    st.header("How Likely Is It Really?")
     st.subheader("Answer a few questions to put things into data-backed context")
 
     symptom = st.text_input("What symptom are you worried about?", placeholder="e.g. breast lump")
@@ -9,7 +9,7 @@ def user_input_form():
     gender = st.selectbox("Your gender identity", ["Female", "Male", "Other"])
     location = st.text_input("Where are you located?", placeholder="e.g. Nepal")
 
-    st.markdown("### 🧬 Your Body & History")
+    st.markdown("### Your Body & History")
     age_menarche = st.slider("At what age did you get your first period?", 8, 20, 12)
     age_thelarche = st.slider("When did your breasts start developing?", 8, 20, 12)
 
@@ -32,12 +32,12 @@ def user_input_form():
 
     benign_lumps = st.selectbox("Have you had a benign (non-cancerous) lump diagnosed before?", ["No", "Yes"])
 
-    st.markdown("### 🌿 Lifestyle")
+    st.markdown("###  Lifestyle")
 
     smoking = st.selectbox("Do you smoke or vape regularly?", ["No", "Yes"])
     alcohol = st.selectbox("Do you consume alcohol weekly?", ["No", "Yes"])
 
-    if st.button("Okay, give it to me gently"):
+    if st.button("What are my odds?"):
         return {
             "symptom": symptom.strip(),
             "age": age,

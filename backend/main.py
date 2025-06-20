@@ -18,9 +18,13 @@ def list_submissions():
 
 
 @app.post("/score")
-def score_risk(data: RiskForm):
-    user_dict = data.dict()
-    result = calculate_risk_score(user_dict)
-    save_submission(user_dict, result["risk_estimate"])
-    return result
+def score_risk(data: UserData):
+    result = calculate_risk_score(data.dict())
 
+    # Make sure this returns something like:
+    return {
+        "risk_estimate": result["risk_estimate"],
+        "contextual_reasons": result["contextual_reasons"],
+        "chart_data": result["chart_data"],
+        "user_summary": result["user_summary"]
+    }

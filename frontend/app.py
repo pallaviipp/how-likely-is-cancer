@@ -1,19 +1,21 @@
 import streamlit as st
-import requests
 from components.input_form import user_input_form
-from components.risk_summary import display_result
+from components.risk_summary import fetch_risk_estimate, render_result
 
-API_URL = "https://how-likely-is-cancer.onrender.com"  # deployed backend URL
+API_URL = "https://how-likely-is-cancer.onrender.com/score"  # Make sure to include /score here
 
 def call_backend_api(user_data):
+    import requests
     try:
-        response = requests.post(API_URL, json=user_data)
+        response = requests.post(API_URL, json=user_data, timeout=20)
         if response.status_code == 200:
             return response.json()
         else:
-            st.error("Backend error: " + str(response.status_code))
+            st.error(f"Backend error: {response.status_code} - {response.text}")
+            return None
     except Exception as e:
-        st.error("Error connecting to backend: " + str(e))
+        st.error(f"Error connecting to backend: {e}")
+        return None
 
 def main():
     st.set_page_config(
@@ -25,14 +27,17 @@ def main():
     st.title(" How Likely Is Breast Cancer Really?")
     st.caption("A data-informed companion for moments of health anxiety.")
 
+    # Show the form and get user input dict
     user_input = user_input_form()
+
+    # Only call backend and display if user_input is present (form submitted)
     if user_input:
-        result = call_backend_api(user_input)
-        if result:
-            display_result(result)
+        response = call_backend_api(user_input)
+        render_result(response)
 
 if __name__ == "__main__":
     main()
+
 #def mock_backend_logic(user_data):
 #    """
 #    Risk estimation logic (mock version).

@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import requests
+
+response = requests.post("https://how-likely-is-cancer.onrender.com/score", json=user_input)
 
 def display_result(response):
     st.markdown("##  Your Personalized Risk Insight")
@@ -8,7 +11,7 @@ def display_result(response):
     st.success(f"**Estimated Risk Level:** {response['risk_estimate']}", icon="🔍")
 
     if response["contextual_reasons"]:
-        st.markdown("### 🧠 Why this result?")
+        st.markdown("###  Why this result?")
         for reason in response["contextual_reasons"]:
             st.markdown(f"- {reason}")
 

@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 def display_result(response):
-    st.markdown("## 📋 Your Personalized Risk Insight")
+    st.markdown("##  Your Personalized Risk Insight")
 
     st.success(f"**Estimated Risk Level:** {response['risk_estimate']}", icon="🔍")
 
@@ -14,7 +14,7 @@ def display_result(response):
 
     st.divider()
 
-    st.markdown("### 📊 Context: Breast Cancer by Age Group")
+    st.markdown("###  Context: Breast Cancer by Age Group")
     df = pd.DataFrame(response["chart_data"])
     fig = px.bar(
         df,
@@ -26,11 +26,11 @@ def display_result(response):
     )
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### 🤍 Reminder")
+    st.markdown("###  Reminder")
     st.info(
         "This tool is a contextual guide, not a diagnosis. "
         "It uses general data patterns to ease anxiety and encourage informed action. "
         "You are always encouraged to speak to a healthcare provider if something feels wrong."
     )
 
-    st.caption("Built with love, logic, and compassion.")
+

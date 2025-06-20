@@ -13,7 +13,7 @@ def user_input_form():
     country_list = sorted([country.name for country in pycountry.countries])
     location = st.selectbox(" Where are you currently located?", country_list, index=country_list.index("Nepal"))
 
-    access_healthcare = st.selectbox(" Do you have access to basic healthcare services nearby?", ["Yes", "No", "Sometimes"])
+    access_healthcare = st.selectbox(" Do you have access to basic healthcare services nearby?", ["Yes", "No", "I don't know"])
 
     # -------------------------  Section 3: Hormonal Life Events -------------------------
     st.markdown("###  Hormonal History")
@@ -39,7 +39,7 @@ def user_input_form():
     )
 
     # -------------------------  Section 4: Family & Genetics -------------------------
-    st.markdown("### 🧬 Family & Genetics")
+    st.markdown("###  Family & Genetics")
     relatives_with_cancer = st.number_input(
         "How many close blood relatives (mother, sister, daughter) have had breast cancer?",
         min_value=0, max_value=10, value=0
@@ -52,16 +52,16 @@ def user_input_form():
     )
 
     # -------------------------  Section 5: Prior Screening -------------------------
-    st.markdown("### 🩻 Prior Breast Screenings")
+    st.markdown("###  Prior Breast Screenings")
     had_mammo = st.selectbox("Have you ever had a mammogram or breast ultrasound?", ["No", "Yes"])
     breast_density = st.selectbox("Have you been told you have dense breasts?", ["No", "Yes", "Don't know"])
     benign_lumps = st.selectbox("Have you ever been diagnosed with a benign breast lump?", ["No", "Yes"])
 
     # -------------------------  Section 6: Lifestyle -------------------------
-    st.markdown("### 🌿 Lifestyle")
+    st.markdown("###  Lifestyle")
     smoking = st.selectbox("Do you smoke or vape regularly?", ["No", "Yes"])
     alcohol = st.selectbox("Do you consume alcohol weekly or more?", ["No", "Yes"])
-    exercise = st.selectbox("How often do you engage in physical activity?", ["Rarely", "1–2x/week", "3–5x/week", "Daily"])
+    exercise = st.selectbox("How often do you exercise?", ["Rarely", "1–2x/week", "3–5x/week", "Daily"])
     anxiety_level = st.selectbox("How anxious are you feeling about your symptom?", ["Mild", "Manageable", "High", "Debilitating"])
 
     # -------------------------  Submit -------------------------

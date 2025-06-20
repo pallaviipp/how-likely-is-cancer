@@ -1,7 +1,7 @@
 import streamlit as st
 
 def user_input_form():
-    st.header("How Likely Is It Really?")
+    st.header("Is it serious or are you anxious?")
     st.subheader("Answer a few questions to put things into data-backed context")
 
     symptom = st.text_input("What symptom are you worried about?", placeholder="e.g. breast lump")

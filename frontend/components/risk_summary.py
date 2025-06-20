@@ -3,15 +3,15 @@ import pandas as pd
 import plotly.express as px
 
 def display_result(response):
-    st.markdown("## 🧾 Here's What the Data Says")
+    st.markdown("##  Here's What the Data Says")
     st.success(f"Based on your inputs, your estimated risk appears to be: **{response['risk_estimate']}**")
 
-    st.markdown("### 🩻 Some context")
+    st.markdown("###  Some context")
     st.markdown(f"> _{response['context']}_")
 
     st.divider()
 
-    st.markdown("### 🧠 Why this matters")
+    st.markdown("###  Why this matters")
     st.write("Breast cancer risk varies depending on genetics, age, hormones, and environment. The data helps us understand population trends — but it doesn't define your story. This is not a diagnosis.")
 
     if "chart_data" in response:

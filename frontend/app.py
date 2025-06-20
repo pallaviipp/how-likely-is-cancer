@@ -26,7 +26,7 @@ def main():
         layout="centered",
         page_icon="🩺"
     )
-    st.title("🌸 How Likely Is It Really?")
+    st.title("How Likely Is It Really?")
     st.caption("A data-informed companion for moments of health anxiety.")
 
     user_input = user_input_form()

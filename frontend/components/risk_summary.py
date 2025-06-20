@@ -3,29 +3,34 @@ import pandas as pd
 import plotly.express as px
 
 def display_result(response):
-    st.markdown("##  Here's What the Data Says")
-    st.success(f"Based on your inputs, your estimated risk appears to be: **{response['risk_estimate']}**")
+    st.markdown("## 📋 Your Personalized Risk Insight")
 
-    st.markdown("###  Some context")
-    st.markdown(f"> _{response['context']}_")
+    st.success(f"**Estimated Risk Level:** {response['risk_estimate']}", icon="🔍")
+
+    if response["contextual_reasons"]:
+        st.markdown("### 🧠 Why this result?")
+        for reason in response["contextual_reasons"]:
+            st.markdown(f"- {reason}")
 
     st.divider()
 
-    st.markdown("###  Why this matters")
-    st.write("Breast cancer risk varies depending on genetics, age, hormones, and environment. The data helps us understand population trends — but it doesn't define your story. This is not a diagnosis.")
+    st.markdown("### 📊 Context: Breast Cancer by Age Group")
+    df = pd.DataFrame(response["chart_data"])
+    fig = px.bar(
+        df,
+        x="age_group",
+        y="incidence_rate",
+        labels={"age_group": "Age Group", "incidence_rate": "Cases per 100,000"},
+        title="Estimated Incidence by Age Group (World Data)",
+        color_discrete_sequence=["#ff7f0e"]
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-    if "chart_data" in response:
-        st.markdown("### 📊 Age-wise incidence comparison")
-        df = pd.DataFrame(response["chart_data"])
-        fig = px.bar(
-            df,
-            x="age_group",
-            y="incidence_rate",
-            labels={"incidence_rate": "Cases per 100,000"},
-            title="Estimated Incidence Rate by Age Group",
-            color_discrete_sequence=["#ff7f0e"]
-        )
-        st.plotly_chart(fig, use_container_width=True)
+    st.markdown("### 🤍 Reminder")
+    st.info(
+        "This tool is a contextual guide, not a diagnosis. "
+        "It uses general data patterns to ease anxiety and encourage informed action. "
+        "You are always encouraged to speak to a healthcare provider if something feels wrong."
+    )
 
-    st.info("If something doesn't feel right, it's always okay to talk to a doctor — even just to calm your mind. You deserve peace of mind.")
-
+    st.caption("Built with love, logic, and compassion.")

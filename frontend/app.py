@@ -103,7 +103,7 @@ def main():
         page_icon="🩺"
     )
 
-    st.title("How Likely Is It Really?")
+    st.title("How Likely Is Breast Cancer Really?")
     st.caption("A data-informed companion for moments of health anxiety.")
 
     # Call input form

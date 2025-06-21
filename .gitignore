@@ -11,3 +11,29 @@ __pycache__/
 
 # VS Code settings
 .vscode/
+# Database files
+backend/data/processed/*.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+.venv/
+venv/
+env/
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db

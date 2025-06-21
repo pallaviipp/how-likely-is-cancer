@@ -57,28 +57,52 @@ def _create_factor_breakdown(factors: dict) -> go.Figure:
     return fig
 
 def _create_age_comparison_chart(chart_data: dict) -> go.Figure:
-    fig = make_subplots(specs=[[{"secondary_y": False}]])
-    fig.add_trace(go.Scatter(
-        x=chart_data['age_groups'],
-        y=[x * 100 for x in chart_data['ethnicity_rates']],
-        name="Your Ethnicity",
-        line=dict(color="blue")
-    ))
-    fig.add_trace(go.Scatter(
-        x=chart_data['age_groups'],
-        y=[x * 100 for x in chart_data['average_rates']],
-        name="Population Average",
-        line=dict(color="gray", dash="dot")
-    ))
-    fig.add_trace(go.Scatter(
-        x=[chart_data['user_age']],
-        y=[chart_data['user_risk'] * 100],
-        name="You",
-        mode='markers',
-        marker=dict(size=12, color="red")
-    ))
-    fig.update_layout(title="Risk Comparison by Age", xaxis_title="Age", yaxis_title="Estimated Risk (%)")
+    required_keys = ['age_groups', 'ethnicity_rates', 'average_rates', 'user_age', 'user_risk']
+    if not all(key in chart_data for key in required_keys):
+        st.warning("Age comparison data incomplete or missing.")
+        return go.Figure()  # return empty figure to avoid crash
+
+    fig = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    fig.add_trace(
+        go.Scatter(
+            x=chart_data['age_groups'],
+            y=[rate * 100 for rate in chart_data['ethnicity_rates']],
+            name="Average Risk by Ethnicity",
+            line=dict(color="blue")
+        ),
+        secondary_y=False
+    )
+    
+    fig.add_trace(
+        go.Scatter(
+            x=chart_data['age_groups'],
+            y=[rate * 100 for rate in chart_data['average_rates']],
+            name="Overall Average Risk",
+            line=dict(color="green", dash="dot")
+        ),
+        secondary_y=False
+    )
+    
+    fig.add_trace(
+        go.Scatter(
+            x=[chart_data['user_age']],
+            y=[chart_data['user_risk'] * 100],
+            mode='markers',
+            marker=dict(color="red", size=12),
+            name="Your Risk"
+        ),
+        secondary_y=False
+    )
+    
+    fig.update_layout(
+        title="Your Risk Compared to Population",
+        xaxis_title="Age",
+        yaxis_title="Risk Percentage",
+        height=400
+    )
     return fig
+
 
 # -------------------------------------------------------------------
 # 3️⃣  Main Rendering Function

@@ -150,26 +150,33 @@ def get_age_ethnicity_comparison_data(age: int, ethnicity: str) -> Dict[str, Any
                 ORDER BY age
             """
             ethnic_data = pd.read_sql_query(query, conn, params=(ethnicity,))
-
-            query = """
+            
+            query_avg = """
                 SELECT age, AVG(risk_rate) as risk_rate
                 FROM risk_baseline
                 GROUP BY age
                 ORDER BY age
             """
-            avg_data = pd.read_sql_query(query, conn)
-
-        user_risk = get_baseline_risk(age, ethnicity)
-        return {
-            "age_groups": ethnic_data['age'].tolist(),
-            "ethnicity_rates": ethnic_data['risk_rate'].tolist(),
-            "average_rates": avg_data['risk_rate'].tolist(),
-            "user_age": age,
-            "user_risk": user_risk
-        }
+            avg_data = pd.read_sql_query(query_avg, conn)
+            
+            user_risk = get_baseline_risk(age, ethnicity)
+            
+            return {
+                "age_groups": ethnic_data['age'].tolist() if not ethnic_data.empty else [],
+                "ethnicity_rates": ethnic_data['risk_rate'].tolist() if not ethnic_data.empty else [],
+                "average_rates": avg_data['risk_rate'].tolist() if not avg_data.empty else [],
+                "user_age": age,
+                "user_risk": user_risk
+            }
     except Exception as e:
-        print(f"Error getting chart data: {e}")
-        return {"age_groups": [], "ethnicity_rates": [], "average_rates": [], "user_age": age, "user_risk": 0.0}
+        print(f"Error getting comparison data: {e}")
+        return {
+            "age_groups": [],
+            "ethnicity_rates": [],
+            "average_rates": [],
+            "user_age": age,
+            "user_risk": 0.0
+        }
 
 def calculate_risk_score(user_data: Dict[str, Any]) -> Dict[str, Any]:
     baseline = get_baseline_risk(user_data["age"], user_data["ethnicity"])

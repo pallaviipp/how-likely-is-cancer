@@ -7,7 +7,7 @@ API_URL = "https://how-likely-is-cancer.onrender.com/score"  # Make sure to incl
 def call_backend_api(user_data):
     import requests
     try:
-        response = requests.post(API_URL, json=user_data, timeout=20)
+        response = requests.post(API_URL, json=user_data, timeout=60)
         if response.status_code == 200:
             return response.json()
         else:

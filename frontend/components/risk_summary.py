@@ -1,216 +1,221 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import requests
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import sqlite3
+import requests
 from datetime import datetime
+from typing import Dict, Optional, List
 
-# -------------------------------------------------------------------
-# 1️⃣  Backend Communication
-# -------------------------------------------------------------------
-BACKEND_URL = "https://how-likely-is-cancer.onrender.com/score"
+# Configuration
+RISK_COLORS = {
+    "Very Low": "#2ecc71",
+    "Low": "#3498db",
+    "Moderate": "#f39c12",
+    "High": "#e74c3c",
+    "Very High": "#c0392b"
+}
 
-def fetch_risk_estimate(payload: dict) -> dict | None:
+def fetch_risk_estimate(payload: dict) -> Optional[Dict]:
+    """Fetch risk estimate from backend API"""
     try:
-        res = requests.post(BACKEND_URL, json=payload, timeout=20)
-        res.raise_for_status()
-        return res.json()
+        response = requests.post(
+            "https://how-likely-is-cancer.onrender.com/score",
+            json=payload,
+            timeout=20
+        )
+        response.raise_for_status()
+        return response.json()
     except Exception as e:
         st.error(f"Could not reach the backend: {e}")
         return None
 
-# -------------------------------------------------------------------
-# 2️⃣  Visualization Components
-# -------------------------------------------------------------------
-def _create_risk_gauge(risk_percent: float) -> go.Figure:
+def create_risk_gauge(risk_percent: float, risk_level: str) -> go.Figure:
+    """Create interactive risk gauge visualization"""
     fig = go.Figure(go.Indicator(
-        mode="gauge+number",
+        mode="gauge+number+delta",
         value=risk_percent,
-        number={'suffix': "%"},
         domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': f"Risk Level: {risk_level}"},
         gauge={
-            'axis': {'range': [0, 100], 'tickwidth': 1},
-            'bar': {'color': "darkblue"},
+            'axis': {'range': [0, 100]},
+            'bar': {'color': RISK_COLORS.get(risk_level, "gray")},
             'steps': [
-                {'range': [0, 5], 'color': "green"},
-                {'range': [5, 12], 'color': "lightgreen"},
-                {'range': [12, 20], 'color': "yellow"},
-                {'range': [20, 30], 'color': "orange"},
-                {'range': [30, 100], 'color': "red"}
-            ]
+                {'range': [0, 5], 'color': "#2ecc71"},
+                {'range': [5, 12], 'color': "#3498db"},
+                {'range': [12, 20], 'color': "#f1c40f"},
+                {'range': [20, 30], 'color': "#e67e22"},
+                {'range': [30, 100], 'color': "#e74c3c"}
+            ],
+            'threshold': {
+                'line': {'color': "black", 'width': 4},
+                'thickness': 0.75,
+                'value': risk_percent
+            }
         }
     ))
-    fig.update_layout(margin=dict(l=20, r=20, t=30, b=20), height=300)
-    return fig
-
-def _create_factor_breakdown(factors: dict) -> go.Figure:
-    df = pd.DataFrame({
-        'factor': list(factors.keys()),
-        'multiplier': list(factors.values())
-    }).sort_values('multiplier')
-    fig = px.bar(df, x='multiplier', y='factor', orientation='h',
-                 color='multiplier', color_continuous_scale='RdYlGn_r',
-                 title="Risk Factor Multipliers")
-    fig.update_layout(xaxis_title="Risk Multiplier", yaxis_title="Factor", coloraxis_showscale=False)
-    return fig
-
-def _create_age_comparison_chart(chart_data: dict) -> go.Figure:
-    required_keys = ['age_groups', 'ethnicity_rates', 'average_rates', 'user_age', 'user_risk']
-    if not all(key in chart_data for key in required_keys):
-        st.warning("Age comparison data incomplete or missing.")
-        return go.Figure()  # return empty figure to avoid crash
-
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    
-    fig.add_trace(
-        go.Scatter(
-            x=chart_data['age_groups'],
-            y=[rate * 100 for rate in chart_data['ethnicity_rates']],
-            name="Average Risk by Ethnicity",
-            line=dict(color="blue")
-        ),
-        secondary_y=False
-    )
-    
-    fig.add_trace(
-        go.Scatter(
-            x=chart_data['age_groups'],
-            y=[rate * 100 for rate in chart_data['average_rates']],
-            name="Overall Average Risk",
-            line=dict(color="green", dash="dot")
-        ),
-        secondary_y=False
-    )
-    
-    fig.add_trace(
-        go.Scatter(
-            x=[chart_data['user_age']],
-            y=[chart_data['user_risk'] * 100],
-            mode='markers',
-            marker=dict(color="red", size=12),
-            name="Your Risk"
-        ),
-        secondary_y=False
-    )
-    
     fig.update_layout(
-        title="Your Risk Compared to Population",
-        xaxis_title="Age",
-        yaxis_title="Risk Percentage",
-        height=400
+        height=300,
+        margin=dict(t=50, b=10, l=20, r=20)
     )
     return fig
 
+def create_factor_barchart(factors: Dict[str, float]) -> go.Figure:
+    """Create horizontal bar chart of risk factors"""
+    df = pd.DataFrame({
+        'Factor': factors.keys(),
+        'Impact': factors.values()
+    }).sort_values('Impact', ascending=True)
+    
+    fig = px.bar(
+        df,
+        x='Impact',
+        y='Factor',
+        orientation='h',
+        color='Impact',
+        color_continuous_scale='RdYlGn_r',
+        title="Risk Factor Contributions"
+    )
+    fig.update_layout(
+        xaxis_title="Risk Multiplier",
+        yaxis_title="",
+        coloraxis_showscale=False
+    )
+    return fig
 
-# -------------------------------------------------------------------
-# 3️⃣  Main Rendering Function
-# -------------------------------------------------------------------
-def render_result(response: dict) -> None:
+def render_result(response: Dict) -> None:
+    """Main rendering function with all original visualizations"""
     if not response:
         st.warning("No data to display.")
         return
 
+    # Set up page layout
     st.set_page_config(layout="wide")
-    st.markdown("## 📋 Personalized Breast Cancer Risk Assessment")
+    st.markdown("## 📋 Your Personalized Risk Assessment")
 
+    # Extract key metrics
     risk_percent = response.get("risk_percentage", 0)
-    risk_label = response.get("risk_estimate", "Unknown")
+    risk_level = response.get("risk_estimate", "Unknown")
+    factors = response.get("factor_breakdown", {})
+    recommendations = response.get("recommendations", [])
+    chart_data = response.get("chart_data", {})
 
-    col1, col2, col3 = st.columns([2, 1, 2])
+    # Main dashboard layout
+    col1, col2, col3 = st.columns([3, 1, 2])
 
     with col1:
-        st.plotly_chart(_create_risk_gauge(risk_percent), use_container_width=True)
+        st.plotly_chart(
+            create_risk_gauge(risk_percent, risk_level),
+            use_container_width=True
+        )
 
     with col2:
-        st.metric("Risk Level", risk_label)
-        st.metric("Risk %", f"{risk_percent:.1f}%")
+        st.metric("Risk Category", risk_level)
+        st.metric("Risk Score", f"{risk_percent:.1f}%")
         if 'timestamp' in response:
             st.caption(f"Generated: {response['timestamp']}")
 
     with col3:
-        recs = response.get("recommendations", [])
         st.markdown("#### Recommendations")
-        if recs:
-            for r in recs[:2]:
-                st.markdown(f"- {r}")
-            if len(recs) > 2:
-                with st.expander("See more"):
-                    for r in recs[2:]:
-                        st.markdown(f"- {r}")
+        if recommendations:
+            for rec in recommendations[:3]:
+                st.markdown(f"- {rec}")
+            if len(recommendations) > 3:
+                with st.expander("See all recommendations"):
+                    for rec in recommendations[3:]:
+                        st.markdown(f"- {rec}")
         else:
-            st.info("No specific recommendations provided.")
+            st.info("No specific recommendations")
 
     st.divider()
 
-    with st.expander("📊 Risk Details", expanded=True):
-        tab1, tab2, tab3 = st.tabs(["Breakdown", "Age Comparison", "Raw Data"])
+    # Detailed analysis section
+    with st.expander("🔍 Detailed Analysis", expanded=True):
+        tab1, tab2 = st.tabs(["Risk Factors", "Population Comparison"])
 
         with tab1:
-            if 'factor_breakdown' in response:
-                st.plotly_chart(_create_factor_breakdown(response['factor_breakdown']), use_container_width=True)
+            if factors:
+                st.plotly_chart(
+                    create_factor_barchart(factors),
+                    use_container_width=True
+                )
+                st.caption("Values >1 increase risk, <1 decrease risk")
             else:
-                st.warning("No factor data")
+                st.warning("No factor data available")
 
         with tab2:
-            if 'chart_data' in response:
-                st.plotly_chart(_create_age_comparison_chart(response['chart_data']), use_container_width=True)
+            if chart_data and all(k in chart_data for k in ['age_groups', 'ethnicity_rates']):
+                fig = go.Figure()
+                fig.add_trace(go.Scatter(
+                    x=chart_data['age_groups'],
+                    y=[x*100 for x in chart_data['ethnicity_rates']],
+                    name="Your Ethnicity Average"
+                ))
+                fig.add_trace(go.Scatter(
+                    x=chart_data['age_groups'],
+                    y=[x*100 for x in chart_data.get('average_rates', [])],
+                    name="General Population",
+                    line=dict(dash='dash')
+                ))
+                if 'user_age' in chart_data and 'user_risk' in chart_data:
+                    fig.add_trace(go.Scatter(
+                        x=[chart_data['user_age']],
+                        y=[chart_data['user_risk']*100],
+                        mode='markers',
+                        name="Your Risk",
+                        marker=dict(size=12, color='red')
+                    ))
+                fig.update_layout(
+                    title="Risk Comparison by Age",
+                    xaxis_title="Age",
+                    yaxis_title="Risk Percentage (%)"
+                )
+                st.plotly_chart(fig, use_container_width=True)
             else:
-                st.warning("No chart data")
+                st.warning("Incomplete comparison data")
 
-        with tab3:
-            st.json(response, expanded=False)
-
+    # Context and disclaimer
     if "contextual_reasons" in response:
-        with st.expander("ℹ️ Why this result?"):
+        with st.expander("ℹ️ About These Results"):
             for reason in response["contextual_reasons"]:
                 st.markdown(f"- {reason}")
 
     st.divider()
-    st.warning(
-        "**Disclaimer**: This is a data-backed estimate, not a diagnosis. Always consult medical professionals."
-    )
+    st.warning("""
+    **Disclaimer**: This tool provides estimates only, not a diagnosis. 
+    Always consult with healthcare professionals for medical advice.
+    Results are based on statistical models and may not reflect individual risk.
+    """)
 
-    if st.button("📥 Download Report"):
-        st.info("PDF report generation coming soon!")
-
-# -------------------------------------------------------------------
-# 4️⃣  Example Usage (optional local test)
-# -------------------------------------------------------------------
+# Example test data
 if __name__ == "__main__":
-    render_result({
+    test_data = {
         "risk_estimate": "Moderate",
-        "risk_percentage": 17.8,
+        "risk_percentage": 18.7,
         "timestamp": datetime.now().isoformat(),
         "factor_breakdown": {
-            "baseline": 0.012,
-            "genetic": 1.8,
-            "hormonal": 1.25,
-            "lifestyle": 1.15,
-            "breast_health": 1.2
+            "Age": 1.5,
+            "Family History": 1.8,
+            "Genetics": 1.0,
+            "Hormonal": 1.2,
+            "Lifestyle": 1.3
         },
         "recommendations": [
-            "Consider more frequent screening.",
-            "Reduce alcohol intake.",
-            "Maintain regular exercise."
+            "Consider annual mammograms",
+            "Discuss family history with your doctor",
+            "Limit alcohol consumption"
         ],
         "contextual_reasons": [
-            "You have 1 close relative with breast cancer",
-            "Hormonal history increases risk",
-            "Your baseline demographic risk is 1.2%"
+            "Age (45) increases risk compared to younger women",
+            "Family history (1 relative) moderately increases risk",
+            "No protective factors identified"
         ],
         "chart_data": {
-            "age_groups": list(range(20, 80)),
-            "ethnicity_rates": [0.01 + 0.0005 * i for i in range(60)],
-            "average_rates": [0.008 + 0.0004 * i for i in range(60)],
+            "age_groups": list(range(20, 80, 5)),
+            "ethnicity_rates": [0.01 + 0.0005*i for i in range(12)],
+            "average_rates": [0.008 + 0.0004*i for i in range(12)],
             "user_age": 45,
-            "user_risk": 0.0178
-        },
-        "user_summary": {
-            "age": 45,
-            "ethnicity": "White",
-            "relatives_with_cancer": 1,
-            "anxiety_level": "High"
+            "user_risk": 0.0187
         }
-    })
+    }
+    render_result(test_data)

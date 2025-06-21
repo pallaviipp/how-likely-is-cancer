@@ -1,0 +1,27 @@
+{
+  "symptom": "breast lump",
+  "age": 30,
+  "gender": "Female",
+  "location": "Nepal",
+  "access_healthcare": "Yes",
+  "age_menarche": 12,
+  "age_thelarche": 12,
+  "menopause": "No",
+  "age_menopause": null,
+  "pregnancy": "Yes",
+  "pregnancy_age": 25,
+  "breastfeeding": "Yes",
+  "pcos": "No",
+  "hormonal_use": "No",
+  "relatives_with_cancer": 0,
+  "brca_known": "No",
+  "ethnicity": "Asian or Pacific Islander",
+  "had_mammo": "No",
+  "breast_density": "No",
+  "benign_lumps": "No",
+  "smoking": "No",
+  "alcohol": "No",
+  "exercise": "3–5x/week",
+  "anxiety_level": "Manageable"
+}
+

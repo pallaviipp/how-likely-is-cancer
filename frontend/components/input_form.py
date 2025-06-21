@@ -46,10 +46,11 @@ def user_input_form():
     )
 
     brca_known = st.selectbox("Have you tested positive for a BRCA mutation?", ["No", "Yes", "Not tested / Not sure"])
-    ethnicity = st.selectbox(
-        "Which ethnic group do you most closely identify with?",
-        ["Asian", "White", "Black", "Latina", "Mixed", "Middle Eastern", "Jewish (Ashkenazi)", "Other", "Prefer not to say"]
-    )
+  race = st.selectbox(
+    "Which race/ethnicity do you most closely identify with?",
+    ["White", "Black", "Hispanic", "Asian or Pacific Islander", "Native American", "Other"],
+    help="Used for contextualizing risk with demographic trends."
+)
 
     # -------------------------  Section 5: Prior Screening -------------------------
     st.markdown("###  Prior Breast Screenings")

@@ -5,20 +5,22 @@ def user_input_form():
     st.header("Is it serious or are you anxious?")
     st.subheader("Answer a few questions to put your concern into data-backed context")
 
+    # -------------------------  Section 1: Symptom -------------------------
     symptom = st.text_input("What symptom are you worried about?", placeholder="e.g. breast lump")
-        # -------------------------  Section 2: Context -------------------------
-    age = st.slider(" Your current age", 10, 100, 22)
-    gender = st.selectbox(" Your gender identity", ["Female", "Male", "Other"])
+
+    # -------------------------  Section 2: Context -------------------------
+    age = st.slider("Your current age", 10, 100, 22)
+    gender = st.selectbox("Your gender identity", ["Female", "Male", "Other"])
 
     country_list = sorted([country.name for country in pycountry.countries])
-    location = st.selectbox(" Where are you currently located?", country_list, index=country_list.index("Nepal"))
+    location = st.selectbox("Where are you currently located?", country_list, index=country_list.index("Nepal"))
 
-    access_healthcare = st.selectbox(" Do you have access to basic healthcare services nearby?", ["Yes", "No", "I don't know"])
+    access_healthcare = st.selectbox("Do you have access to basic healthcare services nearby?", ["Yes", "No", "I don't know"])
 
     # -------------------------  Section 3: Hormonal Life Events -------------------------
-    st.markdown("###  Hormonal History")
-    age_menarche = st.slider("At what age did your periods start?", 8, 20, 12)
-    age_thelarche = st.slider("At what age did your breasts begin developing?", 8, 20, 12)
+    st.markdown("### Hormonal History")
+    age_menarche = st.slider("At what age did your periods start?", 4, 20, 12)
+    age_thelarche = st.slider("At what age did your breasts begin developing?", 4, 20, 12)
 
     menopause = st.selectbox("Have you gone through menopause?", ["No", "Yes", "Not sure"])
     age_menopause = None
@@ -39,27 +41,27 @@ def user_input_form():
     )
 
     # -------------------------  Section 4: Family & Genetics -------------------------
-    st.markdown("###  Family & Genetics")
+    st.markdown("### Family & Genetics")
     relatives_with_cancer = st.number_input(
         "How many close blood relatives (mother, sister, daughter) have had breast cancer?",
         min_value=0, max_value=10, value=0
     )
 
     brca_known = st.selectbox("Have you tested positive for a BRCA mutation?", ["No", "Yes", "Not tested / Not sure"])
-  race = st.selectbox(
-    "Which race/ethnicity do you most closely identify with?",
-    ["White", "Black", "Hispanic", "Asian or Pacific Islander", "Native American", "Other"],
-    help="Used for contextualizing risk with demographic trends."
-)
+    ethnicity = st.selectbox(
+        "Which race/ethnicity do you most closely identify with?",
+        ["White", "Black", "Hispanic", "Asian or Pacific Islander", "Native American", "Other"],
+        help="Used for contextualizing risk with demographic trends."
+    )
 
     # -------------------------  Section 5: Prior Screening -------------------------
-    st.markdown("###  Prior Breast Screenings")
+    st.markdown("### Prior Breast Screenings")
     had_mammo = st.selectbox("Have you ever had a mammogram or breast ultrasound?", ["No", "Yes"])
     breast_density = st.selectbox("Have you been told you have dense breasts?", ["No", "Yes", "Don't know"])
     benign_lumps = st.selectbox("Have you ever been diagnosed with a benign breast lump?", ["No", "Yes"])
 
     # -------------------------  Section 6: Lifestyle -------------------------
-    st.markdown("###  Lifestyle")
+    st.markdown("### Lifestyle")
     smoking = st.selectbox("Do you smoke or vape regularly?", ["No", "Yes"])
     alcohol = st.selectbox("Do you consume alcohol weekly or more?", ["No", "Yes"])
     exercise = st.selectbox("How often do you exercise?", ["Rarely", "1–2x/week", "3–5x/week", "Daily"])
@@ -67,8 +69,6 @@ def user_input_form():
 
     # -------------------------  Submit -------------------------
     if st.button("What are the odds?"):
-
-
         return {
             "symptom": symptom.strip(),
             "age": age,

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
-from models import RiskForm
-from scoring import calculate_risk_score
-from database import init_db, get_all_submissions, save_submission
+from .models import RiskForm
+from .scoring import calculate_risk_score
+from .database import init_db, get_all_submissions, save_submission
 
 
 app = FastAPI()
@@ -18,7 +18,8 @@ def list_submissions():
 
 
 @app.post("/score")
-def score_risk(data: UserData):
+def score_risk(data: RiskForm):
+
     result = calculate_risk_score(data.dict())
 
     # Make sure this returns something like:

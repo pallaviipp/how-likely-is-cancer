@@ -10,9 +10,9 @@ class RiskForm(BaseModel):
     age_menarche: int
     age_thelarche: int
     menopause: str
-    age_menopause: Optional[int]
+    age_menopause: Optional[int] = None
     pregnancy: str
-    pregnancy_age: Optional[int]
+    pregnancy_age: Optional[int] = None
     breastfeeding: str
     pcos: str
     hormonal_use: str
@@ -26,4 +26,3 @@ class RiskForm(BaseModel):
     alcohol: str
     exercise: str
     anxiety_level: str
-
